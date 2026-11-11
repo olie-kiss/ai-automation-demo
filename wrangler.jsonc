@@ -1,0 +1,9 @@
+// Cloudflare Workers config: serve the static shop in ./site.
+// Pushes to main deploy the (broken) shop; every run-* branch gets its own preview URL.
+{
+  "name": "ai-automation-demo",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./site" },
+  "workers_dev": true,
+  "preview_urls": true
+}

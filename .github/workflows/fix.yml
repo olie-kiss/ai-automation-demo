@@ -84,7 +84,7 @@ jobs:
         shell: bash
 
       - name: Deploy a preview
-        run: node scripts/wait-for-preview.mjs
+        run: node scripts/wait-for-preview.mjs "$(git rev-parse HEAD)"
         shell: bash
 
       - name: Verify in a real browser
