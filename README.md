@@ -8,7 +8,7 @@ When a visitor clicks **Fix it** on that page, this repository's [AI-assisted fi
 2. **Find the cause.** The failing test is traced to the exact line of code ([`scripts/diagnose.mjs`](scripts/diagnose.mjs)).
 3. **Write the fix (AI-assisted).** The fix is committed to a new branch, `run-<number>`.
 4. **Run the tests.** All tests must pass.
-5. **Deploy a preview.** Cloudflare Pages publishes the fixed shop at its own address.
+5. **Deploy a preview.** Cloudflare publishes the fixed shop at its own preview address.
 6. **Verify in a real browser.** The same test runs again against the live preview.
 7. **Open the pull request.** It includes the diagnosis and before/after screenshots, and is then closed so the next visitor starts with the same bug.
 
@@ -18,7 +18,7 @@ Every run leaves public evidence behind, so you can check that the work really h
 - [Workflow runs](../../actions/workflows/fix.yml): full logs for each run
 - Branches named `run-*`: the fixed code
 
-The broken original is live at https://ai-automation-demo.pages.dev/cart.html.
+The broken original is live at https://ai-automation-demo.oliver-835.workers.dev/cart.html.
 
 ## Run it locally
 

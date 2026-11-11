@@ -1,7 +1,7 @@
 // "Deploy a preview" step: wait until Cloudflare Pages serves the fixed code.
 const url = `${process.env.PREVIEW}/js/cart.js`;
 const fixed = 'getElementById("checkout-button").addEventListener';
-console.log(`Waiting for Cloudflare Pages to publish ${process.env.PREVIEW}`);
+console.log(`Waiting for Cloudflare to publish ${process.env.PREVIEW}`);
 for (let i = 1; i <= 60; i++) {
   try {
     const res = await fetch(url, { cache: "no-store" });
