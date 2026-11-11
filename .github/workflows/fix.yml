@@ -2,7 +2,7 @@ name: AI-assisted fix
 
 # Started from ai.oliverkiss.com when a visitor clicks "Fix it".
 # Every run starts from main, where the checkout button is broken on purpose,
-# fixes it on its own branch (Cloudflare Workers Builds deploys a preview of it), proves the fix in a real browser, and opens a
+# fixes it on its own branch, uploads a Cloudflare preview of the fixed shop, proves the fix in a real browser, and opens a
 # pull request that is closed (never merged) so the next visitor gets the same bug.
 
 run-name: "Demo run ${{ inputs.run_id }}"
@@ -34,6 +34,8 @@ jobs:
       WORKER: ai-automation-demo
       WORKERS_SUBDOMAIN: oliver-835.workers.dev
       GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_ACCOUNT_ID: f835df71f092e400317a1ff916df80e8
+      WRANGLER_SEND_METRICS: "false"
     steps:
       - name: Check out the shop
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -84,7 +86,12 @@ jobs:
         shell: bash
 
       - name: Deploy a preview
-        run: node scripts/wait-for-preview.mjs "$(git rev-parse HEAD)"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler versions upload --preview-alias "$BRANCH" \
+            --message "AI-assisted fix, demo run $RUN_ID" 2>&1 | grep -vE 'Metrics|^\s*$'
+          node scripts/wait-for-preview.mjs
         shell: bash
 
       - name: Verify in a real browser
