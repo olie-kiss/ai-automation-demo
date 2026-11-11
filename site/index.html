@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fernwood Coffee Roasters</title>
+  <meta name="description" content="Small-batch coffee roasted in British Columbia. A fictional demo store.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="promo">Free shipping on orders over $50 · Roasted to order every Tuesday</div>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="logo-mark">F</span><span>Fernwood<small>Coffee Roasters</small></span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="index.html" aria-current="page">Shop</a>
+        <a class="cart-link" href="cart.html">Cart <span class="cart-count">0</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Small-batch coffee, roasted to order.</h1>
+      <p>Four coffees we love, roasted every Tuesday and shipped the same week.</p>
+    </section>
+    <section class="products" id="products" aria-label="Products"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>Fernwood Coffee Roasters is a fictional store built for an automation demo.</span>
+      <span>No real orders are taken.</span>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { PRODUCTS, loadCart, saveCart, money, bagArt, updateCount } from "./js/products.js";
+
+    document.getElementById("products").innerHTML = PRODUCTS.map((p) => `
+      <article class="product">
+        <div class="art" style="background:#f3ece3">${bagArt(p)}</div>
+        <div class="body">
+          <h3>${p.name}</h3>
+          <p class="notes">${p.origin}<br>${p.notes}</p>
+          <div class="row">
+            <span class="price">${money(p.price)}</span>
+            <button class="btn" type="button" data-id="${p.id}">Add to cart</button>
+          </div>
+        </div>
+      </article>`).join("");
+
+    document.getElementById("products").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-id]");
+      if (!btn) return;
+      const cart = loadCart();
+      const line = cart.find((l) => l.id === btn.dataset.id);
+      if (line) line.qty += 1; else cart.push({ id: btn.dataset.id, qty: 1 });
+      saveCart(cart);
+      updateCount();
+      btn.textContent = "Added ✓";
+      setTimeout(() => (btn.textContent = "Add to cart"), 1200);
+    });
+
+    updateCount();
+  </script>
+</body>
+</html>

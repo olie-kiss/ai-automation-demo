@@ -1,0 +1,13 @@
+{
+  "name": "ai-automation-demo",
+  "private": true,
+  "description": "A fictional coffee shop with a broken checkout button, fixed live by an AI-assisted CI/CD pipeline. Demo for ai.oliverkiss.com.",
+  "type": "module",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

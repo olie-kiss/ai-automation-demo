@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your cart · Fernwood Coffee Roasters</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="promo">Free shipping on orders over $50 · Roasted to order every Tuesday</div>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="logo-mark">F</span><span>Fernwood<small>Coffee Roasters</small></span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="index.html">Shop</a>
+        <a class="cart-link" href="cart.html" aria-current="page">Cart <span class="cart-count">0</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap cart-page">
+    <h1>Your cart</h1>
+    <div class="cart-layout">
+      <section class="cart-items" id="cart-items" aria-label="Items in your cart"></section>
+
+      <aside class="summary" aria-label="Order summary">
+        <h2>Order summary</h2>
+        <dl>
+          <dt>Subtotal</dt><dd id="subtotal">–</dd>
+          <dt>Shipping</dt><dd id="shipping">–</dd>
+          <dt>Tax (GST + PST)</dt><dd id="tax">–</dd>
+          <dt class="total">Total</dt><dd class="total" id="total">–</dd>
+        </dl>
+        <button class="btn block" id="checkout-button" type="button">Checkout</button>
+        <p class="fine">Secure checkout · Free returns within 30 days</p>
+      </aside>
+    </div>
+  </main>
+
+  <dialog class="checkout" id="checkout-dialog" aria-labelledby="checkout-title">
+    <header>
+      <h2 id="checkout-title">Secure checkout</h2>
+      <button class="close-x" id="close-checkout" type="button" aria-label="Close">&times;</button>
+    </header>
+    <form class="content" method="dialog">
+      <label>Email <input type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label>Full name <input type="text" autocomplete="name"></label>
+      <label>Street address <input type="text" autocomplete="street-address"></label>
+      <div class="two">
+        <label>City <input type="text" autocomplete="address-level2"></label>
+        <label>Postal code <input type="text" autocomplete="postal-code"></label>
+      </div>
+      <div class="due"><span>Due today</span><span id="due">–</span></div>
+      <button class="btn block" type="submit">Continue to payment</button>
+    </form>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>Fernwood Coffee Roasters is a fictional store built for an automation demo.</span>
+      <span>No real orders are taken.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/cart.js"></script>
+</body>
+</html>
