@@ -14,15 +14,18 @@ const failed = [];
   for (const spec of suite.specs ?? []) {
     for (const t of spec.tests) {
       const r = t.results.at(-1);
-      if (r && r.status !== "passed") failed.push({ title: spec.title, file: spec.file, error: (r.error?.message ?? "").split("\n")[0] });
+      if (r && r.status !== "passed") failed.push({ title: spec.title, file: spec.file, error: (r.error?.message ?? "").replace(/\x1b\[[0-9;]*m/g, "").split("\n")[0] });
     }
   }
 })(results);
 
 // 2. IDs that exist in the HTML pages.
 const htmlIds = new Set();
+const buttonIds = new Set();
 for (const f of (await readdir(SITE)).filter((f) => f.endsWith(".html"))) {
-  for (const m of (await readFile(join(SITE, f), "utf8")).matchAll(/\bid="([^"]+)"/g)) htmlIds.add(m[1]);
+  const html = await readFile(join(SITE, f), "utf8");
+  for (const m of html.matchAll(/\bid="([^"]+)"/g)) htmlIds.add(m[1]);
+  for (const m of html.matchAll(/<button\b[^>]*\bid="([^"]+)"/g)) buttonIds.add(m[1]);
 }
 
 // 3. IDs the JavaScript looks up, and whether each exists.
@@ -34,7 +37,7 @@ for (const f of await readdir(jsDir)) {
     for (const m of line.matchAll(/getElementById\("([^"]+)"\)|querySelector\("#([\w-]+)"\)/g)) {
       const id = m[1] ?? m[2];
       if (!htmlIds.has(id)) {
-        const close = [...htmlIds].filter((h) => h.startsWith(id.split("-")[0]));
+        const close = [...buttonIds].filter((h) => h.startsWith(id.split("-")[0]));
         problems.push({ file: `site/js/${f}`, line: i + 1, code: line.trim(), missingId: id, likelyMeant: close });
       }
     }
@@ -50,7 +53,7 @@ if (problems.length === 0) {
   for (const p of problems) {
     console.log(`Cause: ${p.file}:${p.line} attaches the click handler to #${p.missingId},`);
     console.log(`       but no element on the page has id="${p.missingId}".`);
-    if (p.likelyMeant.length) console.log(`       The Checkout button's id is "${p.likelyMeant.join('", "')}".`);
+    if (p.likelyMeant.length) console.log(`       The button on the page is id="${p.likelyMeant.join('" or id="')}".`);
     console.log(`       The ?. operator hides the error, so the button silently does nothing.`);
     console.log(`  > ${p.code}`);
   }

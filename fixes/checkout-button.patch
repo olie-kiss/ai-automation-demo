@@ -1,0 +1,13 @@
+diff --git a/site/js/cart.js b/site/js/cart.js
+index d35f38f..3999244 100644
+--- a/site/js/cart.js
++++ b/site/js/cart.js
+@@ -71,7 +71,7 @@ function openCheckout() {
+   dialog.querySelector("input").focus();
+ }
+ 
+-document.querySelector("#checkout-btn")?.addEventListener("click", openCheckout);
++document.getElementById("checkout-button").addEventListener("click", openCheckout);
+ document.getElementById("close-checkout").addEventListener("click", () => dialog.close());
+ 
+ render();

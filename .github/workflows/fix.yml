@@ -1,0 +1,113 @@
+name: AI-assisted fix
+
+# Started from ai.oliverkiss.com when a visitor clicks "Fix it".
+# Every run starts from main, where the checkout button is broken on purpose,
+# fixes it on its own branch, proves the fix in a real browser, and opens a
+# pull request that is closed (never merged) so the next visitor gets the same bug.
+
+run-name: "Demo run ${{ inputs.run_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Run number from ai.oliverkiss.com"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: demo-fix
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    name: Fix the checkout button
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      RUN_ID: ${{ inputs.run_id }}
+      PAGES_PROJECT: ai-automation-demo
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out the shop
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Prepare
+        run: |
+          [[ "$RUN_ID" =~ ^[0-9]{1,10}$ ]] || { echo "::error::run_id must be a number"; exit 1; }
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "AI-assisted fix"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "BRANCH=run-$RUN_ID" >> "$GITHUB_ENV"
+          echo "PREVIEW=https://run-$RUN_ID.$PAGES_PROJECT.pages.dev" >> "$GITHUB_ENV"
+          npm ci --no-audit --no-fund
+          mkdir -p evidence
+        shell: bash
+
+      - name: Reproduce the bug
+        run: |
+          if npx playwright test; then
+            echo "::error::Expected the checkout test to fail, but every test passed."
+            exit 1
+          fi
+          cp test-results/checkout-*/after-checkout-click.png evidence/before.png
+          echo "Bug reproduced: clicking Checkout does nothing."
+        shell: bash
+
+      - name: Find the cause
+        run: node scripts/diagnose.mjs | tee evidence/diagnosis.txt
+        shell: bash
+
+      - name: Write the fix (AI-assisted)
+        run: |
+          git switch -c "$BRANCH"
+          git apply fixes/checkout-button.patch
+          git diff --stat
+          git commit -am "AI-assisted fix: checkout button does nothing (run $RUN_ID)" \
+            -m "$(sed -n '/^Cause:/,$p' evidence/diagnosis.txt)"
+          git push origin "$BRANCH"
+        shell: bash
+
+      - name: Run the tests
+        run: |
+          rm -rf test-results
+          npx playwright test
+          cp test-results/checkout-*/after-checkout-click.png evidence/after.png
+        shell: bash
+
+      - name: Deploy a preview
+        run: node scripts/wait-for-preview.mjs
+        shell: bash
+
+      - name: Verify in a real browser
+        run: |
+          rm -rf test-results
+          BASE_URL="$PREVIEW" npx playwright test tests/checkout.spec.js
+          cp test-results/checkout-*/after-checkout-click.png evidence/live.png
+        shell: bash
+
+      - name: Open the pull request
+        run: |
+          git add evidence
+          git commit -m "Test evidence for run $RUN_ID [skip ci]"
+          git push origin "$BRANCH"
+          node scripts/open-pr.mjs
+        shell: bash
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Demo run $RUN_ID"
+            echo "- Pull request: ${PR_URL:-not created}"
+            echo "- Live preview: $PREVIEW/cart.html"
+            echo "- Broken original: https://$PAGES_PROJECT.pages.dev/cart.html"
+          } >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
