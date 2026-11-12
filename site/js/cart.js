@@ -71,7 +71,7 @@ function openCheckout() {
   dialog.querySelector("input").focus();
 }
 
-document.querySelector("#checkout-btn")?.addEventListener("click", openCheckout);
+document.getElementById("checkout-button").addEventListener("click", openCheckout);
 document.getElementById("close-checkout").addEventListener("click", () => dialog.close());
 
 render();
