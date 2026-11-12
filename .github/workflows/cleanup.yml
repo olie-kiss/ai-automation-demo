@@ -1,0 +1,47 @@
+name: Clean up old demo runs
+
+# Each demo run leaves a run-<number> branch behind. This removes branches
+# older than 7 days, always keeping the 5 newest. Pull requests, their
+# screenshots (linked by commit) and run logs are not affected.
+
+on:
+  schedule:
+    - cron: "17 9 * * *"   # daily, 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEEP_NEWEST: "5"
+      MAX_AGE_DAYS: "7"
+    steps:
+      - name: Delete old run branches
+        shell: bash
+        run: |
+          api() { curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$@"; }
+          base="https://api.github.com/repos/$GITHUB_REPOSITORY"
+          cutoff=$(date -u -d "$MAX_AGE_DAYS days ago" +%s)
+          # run-<number> branches only, newest run number first (up to 500 per day)
+          mapfile -t branches < <(
+            for page in 1 2 3 4 5; do
+              api "$base/git/matching-refs/heads/run-?per_page=100&page=$page" | jq -r '.[].ref | sub("refs/heads/"; "")'
+            done | grep -E '^run-[0-9]+$' | sort -t- -k2 -n -r
+          )
+          echo "Found ${#branches[@]} run branches."
+          deleted=0
+          for i in "${!branches[@]}"; do
+            b="${branches[$i]}"
+            [[ "$b" =~ ^run-[0-9]+$ ]] || continue
+            (( i < KEEP_NEWEST )) && continue
+            when=$(api "$base/commits/$b" | jq -r '.commit.committer.date')
+            if (( $(date -u -d "$when" +%s) < cutoff )); then
+              api -X DELETE "$base/git/refs/heads/$b" && echo "Deleted $b (last commit $when)" && deleted=$((deleted + 1))
+            fi
+          done
+          echo "Deleted $deleted branches."
