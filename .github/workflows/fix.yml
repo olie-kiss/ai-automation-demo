@@ -106,7 +106,7 @@ jobs:
           git add evidence
           git commit -m "Test evidence for run $RUN_ID [skip ci]"
           git push origin "$BRANCH"
-          node scripts/open-pr.mjs
+          EVIDENCE_SHA=$(git rev-parse HEAD) node scripts/open-pr.mjs
         shell: bash
 
       - name: Summary
