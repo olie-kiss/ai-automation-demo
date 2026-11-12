@@ -31,7 +31,7 @@ jobs:
           mapfile -t branches < <(
             for page in 1 2 3 4 5; do
               api "$base/git/matching-refs/heads/run-?per_page=100&page=$page" | jq -r '.[].ref | sub("refs/heads/"; "")'
-            done | grep -E '^run-[0-9]+$' | sort -t- -k2 -n -r
+            done | grep -E '^run-[0-9]+$' | sort -u | sort -t- -k2 -n -r
           )
           echo "Found ${#branches[@]} run branches."
           deleted=0
