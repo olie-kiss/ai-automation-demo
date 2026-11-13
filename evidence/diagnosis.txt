@@ -1,0 +1,9 @@
+Failing tests: 1
+  ✗ clicking Checkout opens the secure checkout form
+    Error: expect(locator).toBeVisible() failed
+
+Cause: site/js/cart.js:74 attaches the click handler to #checkout-btn,
+       but no element on the page has id="checkout-btn".
+       The button on the page is id="checkout-button".
+       The ?. operator hides the error, so the button silently does nothing.
+  > document.querySelector("#checkout-btn")?.addEventListener("click", openCheckout);
